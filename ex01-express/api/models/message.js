@@ -7,6 +7,10 @@ const getMessageModel = (sequelize, { DataTypes }) => {
         notEmpty: true,
       },
     },
+  }, {
+    // FORÇA O SEQUELIZE A USAR O NOME EXATO DA TABELA NO POSTGRESQL
+    tableName: 'messages',
+    freezeTableName: true, 
   });
 
   Message.associate = (models) => {

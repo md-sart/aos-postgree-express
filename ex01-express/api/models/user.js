@@ -16,6 +16,11 @@ const getUserModel = (sequelize, { DataTypes }) => {
         notEmpty: true,
       },
     },
+  }, {
+    // CORREÇÃO: Força o Sequelize a usar o nome exato 'users' (minúsculo/plural)
+    // para corresponder à convenção do PostgreSQL e resolver o Erro 500.
+    tableName: 'users',
+    freezeTableName: true,
   });
 
   User.associate = (models) => {
