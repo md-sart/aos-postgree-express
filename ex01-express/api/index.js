@@ -2,29 +2,30 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 
-import models, { sequelize } from "./models";
-import routes from "./routes";
+import models, { sequelize } from "./models/index.js";
+import routes from "./routes/index.js";
 
 const app = express();
 app.set("trust proxy", true);
 
+// Configuração de CORS
 var corsOptions = {
   origin: ["http://example.com", "*"],
-  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
 
+// Logging simples de cada requisição
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path} - ${req.ip}`);
   next();
 });
 
-// Código para conseguir extrair o conteúdo do body da mensagem HTTP
-// e armazenar na propriedade req.body (utiliza o body-parser)
+// Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Código para injetar no context o usuário que está logado e os models
+// Injetando models e usuário "me" no context
 app.use(async (req, res, next) => {
   req.context = {
     models,
@@ -33,42 +34,38 @@ app.use(async (req, res, next) => {
   next();
 });
 
+// Rotas
 app.use("/", routes.root);
 app.use("/session", routes.session);
 app.use("/users", routes.user);
 app.use("/messages", routes.message);
 
 const port = process.env.PORT ?? 3000;
-
 const eraseDatabaseOnSync = process.env.ERASE_DATABASE === "true";
 
+// Sincronização do banco e inicialização
 sequelize.sync({ force: eraseDatabaseOnSync }).then(async () => {
   if (eraseDatabaseOnSync) {
-    createUsersWithMessages();
+    await createUsersWithMessages();
   }
 
   app.listen(port, () => {
-    console.log(`Example app listening on port ${port}!`);
+    console.log(`Server listening on port ${port}!`);
   });
 });
 
+// Função para popular DB inicial
 const createUsersWithMessages = async () => {
   await models.User.create(
     {
       username: "rwieruch",
       email: "rwieruch@email.com",
       messages: [
-        {
-          text: "Published the Road to learn React",
-        },
-        {
-          text: "Published also the Road to learn Express + PostgreSQL",
-        },
+        { text: "Published the Road to learn React" },
+        { text: "Published also the Road to learn Express + PostgreSQL" },
       ],
     },
-    {
-      include: [models.Message],
-    }
+    { include: [models.Message] }
   );
 
   await models.User.create(
@@ -76,16 +73,10 @@ const createUsersWithMessages = async () => {
       username: "ddavids",
       email: "ddavids@email.com",
       messages: [
-        {
-          text: "Happy to release ...",
-        },
-        {
-          text: "Published a complete ...",
-        },
+        { text: "Happy to release ..." },
+        { text: "Published a complete ..." },
       ],
     },
-    {
-      include: [models.Message],
-    }
+    { include: [models.Message] }
   );
 };
