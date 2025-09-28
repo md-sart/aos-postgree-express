@@ -1,3 +1,5 @@
+console.log("POSTGRES_URL =", process.env.POSTGRES_URL);
+
 import Sequelize from "sequelize";
 
 import getUserModel from "./user.js";
