@@ -1,6 +1,9 @@
+import "dotenv/config";
+
+console.log("process.env keys:", Object.keys(process.env));
 console.log("POSTGRES_URL =", process.env.POSTGRES_URL);
 
-import "dotenv/config";
+
 import cors from "cors";
 import express from "express";
 
